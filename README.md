@@ -8,7 +8,7 @@
 
 input/output image-matrix
 
-perkalian, penjumlahan, pengurangan polinom, determinan matrix polinom (mengasialkan vektor 1 X (n+1))
+perkalian, penjumlahan, pengurangan polinom, determinan matrix polinom (menghasilkan vektor 1 X (n+1))
 
 pembentukan U,V^t,sigma
 
