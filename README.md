@@ -10,8 +10,6 @@ input/output image-matrix
 
 perkalian, penjumlahan, pengurangan polinom
 
-solve polinom (mendapatkan eigenvalues)
-
 pembentukan U,V^t,sigma
 
 kompresi sigma (menghilangkan beberapa value)
