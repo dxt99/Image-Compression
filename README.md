@@ -14,4 +14,4 @@ solve polinom (mendapatkan eigenvalues)
 
 pembentukan U,V^t,sigma
 
-kompresi v^t (menghilangkan beberapa value)
+kompresi sigma (menghilangkan beberapa value)
