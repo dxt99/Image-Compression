@@ -4,7 +4,7 @@
 
 ## BACKEND: backend.py
 
-### matrix berisi array of double, bukan double
+### matrix berisi array of double (jika matrix n X n maka array berisi n+1 (sifat polinom))
 
 input/output image-matrix
 
