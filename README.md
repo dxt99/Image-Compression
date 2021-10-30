@@ -10,6 +10,6 @@ input/output image-matrix
 
 perkalian, penjumlahan, pengurangan polinom, determinan matrix polinom (menghasilkan vektor 1 X (n+1))
 
-pembentukan U,V^t,sigma
+pembentukan U,V^t,sigma (i/o tetap double)
 
 kompresi sigma (menghilangkan beberapa value)
