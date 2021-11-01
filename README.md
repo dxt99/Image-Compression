@@ -11,5 +11,3 @@ input/output image-matrix; kompresi sigma (menghilangkan beberapa value)
 perkalian, penjumlahan, pengurangan polinom, determinan matrix polinom (menghasilkan vektor 1 X (n+1))
 
 pembentukan U,V^t,sigma (i/o tetap double)
-
-
