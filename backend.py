@@ -1,5 +1,35 @@
 import numpy as np
+from PIL import Image
 import math
+
+def imageToMat(filename):
+    im=Image.open(filename)
+    ar=np.array(im)
+    tempMatR=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
+    tempMatG=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
+    tempMatB=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
+    for i in range(np.shape(ar)[0]):
+        for j in range(np.shape(ar)[1]):
+            tempMatR[i][j]=ar[i,j,0]
+    for i in range(np.shape(ar)[0]):
+        for j in range(np.shape(ar)[1]):
+            tempMatG[i][j]=ar[i,j,1]
+    for i in range(np.shape(ar)[0]):
+        for j in range(np.shape(ar)[1]):
+            tempMatB[i][j]=ar[i,j,2]
+    matR=np.array(tempMatR)
+    matG=np.array(tempMatG)
+    matB=np.array(tempMatB)
+    return [matR,matG,matB]
+
+def matToImage(matR,matG,matB):
+    tempMatRGB=[[[0,0,0] for j in range(np.shape(matR)[1])] for i in range(np.shape(matR)[0])]
+    for i in range(np.shape(matR)[0]):
+        for j in range(np.shape(matR)[1]):
+            tempMatRGB[i][j]=[matR[i,j],matG[i,j],matB[i,j]]
+    matRGB=np.array(tempMatRGB)
+    im = Image.fromarray(matRGB)
+    im.save("compressed.jpg") #filename probably needs to change
 
 def sqrt(m):
     square = 0
