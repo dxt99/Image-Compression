@@ -1,6 +1,8 @@
 # Algeo02-20120
 
-## FRONTEND: kompresi.html
+## FRONTEND
+
+index.php: image upload done, path at images
 
 ## BACKEND: backend.py
 
