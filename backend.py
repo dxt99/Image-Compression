@@ -31,6 +31,62 @@ def matToImage(matR,matG,matB):
     im = Image.fromarray(matRGB)
     im.save("compressed.jpg") #filename probably needs to change
 
+def sumPol(m1,m2): #Penjumlahan Polinom
+    lenM1 = len(m1)
+    lenM2 = len(m2)
+    if (lenM1 > lenM2) :
+        m3  = [0 for i in range(lenM1)]
+        for i in range(lenM2):
+            m3[i] = m1[i] + m2[i]
+        m3[lenM1-1] = m1[lenM1-1]
+        return m3
+    elif (lenM1 < lenM2) :
+        m3 = [0 for i in range(lenM2)]
+        for i in range(lenM1):
+            m3[i] = m1[i] + m2[i]
+        m3[lenM2-1] = m2[lenM2-1]
+        return m3
+    else:
+        m3 = [0 for i in range(lenM1)]
+        for i in range(lenM1):
+            m3[i] = m1[i] + m2[i]
+        return m3
+    
+def subsPol(m1, m2): #Pengurangan Polinom
+    lenM1 = len(m1)
+    lenM2 = len(m2)
+    if (lenM1 > lenM2) :
+        m3  = [0 for i in range(lenM1)]
+        for i in range(lenM2):
+            m3[i] = m1[i] - m2[i]
+        m3[lenM1-1] = m1[lenM1-1]
+        return m3
+    elif (lenM1 < lenM2) :
+        m3 = [0 for i in range(lenM2)]
+        for i in range(lenM1):
+            m3[i] = m1[i] - m2[i]
+        m3[lenM2-1] = -m2[lenM2-1]
+        return m3
+    else:
+        m3 = [0 for i in range(lenM1)]
+        for i in range(lenM1):
+            m3[i] = m1[i] - m2[i]
+        return m3
+
+def mulPol(m1, m2):
+    lenM1 = len(m1)
+    lenM2 = len(m2)
+    lenM3 = lenM1 + lenM2 - 1
+    m3 = [0 for i in range(lenM3)]
+    for i in range(lenM1):
+        for j in range(lenM2):
+            m3[i+j] += m1[i]*m2[j]
+    return m3
+
+def detMatrixPol(m):
+    #inProgress
+    return
+
 def sqrt(m):
     square = 0
     for i in range(len(m)):
@@ -91,3 +147,10 @@ def VT(m):
         combine = np.column_stack((combine,normal[j]))
     combineT = np.transpose(combine)
     return combineT
+
+
+
+m1 = [8, 6, 1]
+m2 = [-1, 1]
+
+print(mulPol(m1, m2))
