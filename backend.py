@@ -147,10 +147,3 @@ def VT(m):
         combine = np.column_stack((combine,normal[j]))
     combineT = np.transpose(combine)
     return combineT
-
-
-
-m1 = [8, 6, 1]
-m2 = [-1, 1]
-
-print(mulPol(m1, m2))
