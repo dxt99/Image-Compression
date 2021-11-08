@@ -1,10 +1,37 @@
 import numpy as np
 from PIL import Image
 import math
+import sys
+import time
 
+'''
 def imageToMat(filename):
     im=Image.open(filename)
     ar=np.array(im)
+    tempMat=[]
+    for i in range(np.shape(ar)[2]):
+        tempMat.append([[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])])
+    for k in range(np.shape(ar)[2]):
+        for i in range(np.shape(ar)[0]):
+            for j in range(np.shape(ar)[1]):
+                tempMat[k][i][j]=ar[i,j,k]
+    ret=[]
+    for temp in tempMat:
+        mat=np.array(temp)
+        ret.append(mat)
+    return ret
+
+def matToImage(tempMat,compressed):
+    ret=[[[0 for k in range(len(tempMat))] for j in range(np.shape(tempMat[0])[1])] for i in range(np.shape(tempMat[0])[0])]
+    for i in range(np.shape(tempMat[0])[0]):
+        for j in range(np.shape(tempMat[0])[1]):
+            for k in range(len(tempMat)):
+                ret[i][j][k]=tempMat[k][i,j]
+    matRGB=np.array(ret)
+    im = Image.fromarray(ret)
+    im.save(compressed)
+'''
+def imageToMatRGB(ar):
     tempMatR=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
     tempMatG=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
     tempMatB=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
@@ -22,15 +49,15 @@ def imageToMat(filename):
     matB=np.array(tempMatB)
     return [matR,matG,matB]
 
-def matToImage(matR,matG,matB):
+def matToImageRGB(matR,matG,matB,compressed):
     tempMatRGB=[[[0,0,0] for j in range(np.shape(matR)[1])] for i in range(np.shape(matR)[0])]
     for i in range(np.shape(matR)[0]):
         for j in range(np.shape(matR)[1]):
             tempMatRGB[i][j]=[matR[i,j],matG[i,j],matB[i,j]]
     matRGB=np.array(tempMatRGB)
     im = Image.fromarray(matRGB)
-    im.save("compressed.jpg") #filename probably needs to change
-
+    im.save(compressed) #filename probably needs to change
+    
 def sumPol(m1,m2): #Penjumlahan Polinom
     lenM1 = len(m1)
     lenM2 = len(m2)
@@ -189,7 +216,30 @@ def VT(m):
     combineT = np.transpose(combine)
     return combineT
 
+'''
 mat = [[[-5, 1], [-4], [3]], #contoh
         [[-4], [-5, 1], [3]], 
         [[3], [3], [-2, 1]]]
 print((invMatDet(detMatrixPol(mat))))
+'''
+
+if __name__ == '__main__':
+    t_start=time.time()
+    filename=sys.argv[1]
+    im=Image.open(filename)
+    ar=np.array(im)
+    if (len(np.shape(ar))==3): #RGB
+        mats=imageToMatRGB(ar)
+    else: #BW
+        mats=ar
+    
+    #matrix calculation here
+
+    compressed=sys.argv[2]
+    if (len(np.shape(ar))==3): #RGB
+        matToImageRGB(mats[0],mats[1],mats[2],compressed)
+    else:
+        im = Image.fromarray(mats)
+        im.save(compressed)    
+    t_end=time.time()
+    print(t_end-t_start)
