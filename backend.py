@@ -192,4 +192,4 @@ def VT(m):
 mat = [[[-5, 1], [-4], [3]], #contoh
         [[-4], [-5, 1], [3]], 
         [[3], [3], [-2, 1]]]
-print(np.roots(invMatDet(detMatrixPol(mat))))
+print((invMatDet(detMatrixPol(mat))))
