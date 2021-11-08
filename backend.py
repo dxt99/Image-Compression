@@ -4,33 +4,6 @@ import math
 import sys
 import time
 
-'''
-def imageToMat(filename):
-    im=Image.open(filename)
-    ar=np.array(im)
-    tempMat=[]
-    for i in range(np.shape(ar)[2]):
-        tempMat.append([[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])])
-    for k in range(np.shape(ar)[2]):
-        for i in range(np.shape(ar)[0]):
-            for j in range(np.shape(ar)[1]):
-                tempMat[k][i][j]=ar[i,j,k]
-    ret=[]
-    for temp in tempMat:
-        mat=np.array(temp)
-        ret.append(mat)
-    return ret
-
-def matToImage(tempMat,compressed):
-    ret=[[[0 for k in range(len(tempMat))] for j in range(np.shape(tempMat[0])[1])] for i in range(np.shape(tempMat[0])[0])]
-    for i in range(np.shape(tempMat[0])[0]):
-        for j in range(np.shape(tempMat[0])[1]):
-            for k in range(len(tempMat)):
-                ret[i][j][k]=tempMat[k][i,j]
-    matRGB=np.array(ret)
-    im = Image.fromarray(ret)
-    im.save(compressed)
-'''
 def imageToMatRGB(ar):
     tempMatR=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
     tempMatG=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
