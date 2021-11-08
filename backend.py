@@ -38,13 +38,17 @@ def sumPol(m1,m2): #Penjumlahan Polinom
         m3  = [0 for i in range(lenM1)]
         for i in range(lenM2):
             m3[i] = m1[i] + m2[i]
-        m3[lenM1-1] = m1[lenM1-1]
+        for i in range(lenM1-lenM2):
+            i += lenM2
+            m3[i] = m1[i]
         return m3
     elif (lenM1 < lenM2) :
         m3 = [0 for i in range(lenM2)]
         for i in range(lenM1):
             m3[i] = m1[i] + m2[i]
-        m3[lenM2-1] = m2[lenM2-1]
+        for i in range(lenM2-lenM1):
+            i += lenM1
+            m3[i] = m2[i]
         return m3
     else:
         m3 = [0 for i in range(lenM1)]
@@ -59,13 +63,17 @@ def subsPol(m1, m2): #Pengurangan Polinom
         m3  = [0 for i in range(lenM1)]
         for i in range(lenM2):
             m3[i] = m1[i] - m2[i]
-        m3[lenM1-1] = m1[lenM1-1]
+        for i in range(lenM1-lenM2):
+            i += lenM2
+            m3[i] = m1[i]
         return m3
     elif (lenM1 < lenM2) :
         m3 = [0 for i in range(lenM2)]
         for i in range(lenM1):
             m3[i] = m1[i] - m2[i]
-        m3[lenM2-1] = -m2[lenM2-1]
+        for i in range(lenM2-lenM1):
+            i += lenM1
+            m3[i] = -m2[i]
         return m3
     else:
         m3 = [0 for i in range(lenM1)]
@@ -73,7 +81,7 @@ def subsPol(m1, m2): #Pengurangan Polinom
             m3[i] = m1[i] - m2[i]
         return m3
 
-def mulPol(m1, m2):
+def mulPol(m1, m2): #Perkalian Polinom
     lenM1 = len(m1)
     lenM2 = len(m2)
     lenM3 = lenM1 + lenM2 - 1
@@ -83,9 +91,42 @@ def mulPol(m1, m2):
             m3[i+j] += m1[i]*m2[j]
     return m3
 
-def detMatrixPol(m):
-    #inProgress
-    return
+def subMatrix(mat,row, col):
+    subMat = [[[0,0] for j in range(len(mat)-1)] for i in range(len(mat)-1)]
+    subRow = 0
+    subCol = 0
+    for i in range(len(mat)):
+        for j in range(len(mat)):
+            if(i != row) and (j!= col):
+                subMat[subRow][subCol] = mat[i][j]
+                subCol+=1
+                if(subCol == len(subMat)):
+                    subRow+=1
+                    subCol=0
+
+    return subMat
+
+def detMatrixPol(m): #Mendapatkan Determinan dalam bentuk Polinom (array), dengan masukan m = lambda(I) - A
+    det = [0 for i in range(len(m) + 1)]
+    if (len(m) == 2):
+        return (subsPol(mulPol(m[0][0], m[1][1]), mulPol(m[0][1], m[1][0])))
+    else :
+        for i in range(len(m)):
+            if(i % 2 == 0):
+                temp = mulPol(m[i][0],detMatrixPol(subMatrix(m, i, 0)))
+                det = sumPol(det, temp)
+            else:
+                temp = mulPol(m[i][0],detMatrixPol(subMatrix(m, i, 0)))
+                det = subsPol(det, temp) 
+    return det
+
+def invMatDet(m): #Memutar posisi matriks determinan agar pangkat terbesar di posisi indeks 1 agar dapat np.roots
+    idxTemp = len(m)-1
+    matRes = [0 for i in range(len(m))]
+    for i in range(len(m)):
+        matRes[i] = m[idxTemp]
+        idxTemp -=1
+    return matRes
 
 def sqrt(m):
     square = 0
@@ -148,9 +189,7 @@ def VT(m):
     combineT = np.transpose(combine)
     return combineT
 
-
-
-m1 = [8, 6, 1]
-m2 = [-1, 1]
-
-print(mulPol(m1, m2))
+mat = [[[-5, 1], [-4], [3]], #contoh
+        [[-4], [-5, 1], [3]], 
+        [[3], [3], [-2, 1]]]
+print(np.roots(invMatDet(detMatrixPol(mat))))
