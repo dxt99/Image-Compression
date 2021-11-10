@@ -207,7 +207,10 @@ if __name__ == '__main__':
         mats=ar
     
     #matrix calculation here
-
+    #Case 1: RGB, mats: array of 3 matrices, each n*m.
+    #        Just SVD each array seperately
+    #Case 2: BW, mats: a matrix, size n*m, normal SVD
+    
     compressed=sys.argv[2]
     if (len(np.shape(ar))==3): #RGB
         matToImageRGB(mats[0],mats[1],mats[2],compressed)
