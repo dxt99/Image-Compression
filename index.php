@@ -11,13 +11,10 @@ Singular value used: <input type="text" name="fname"><br/>
 </form>
 
 <?php
-$filepath="";
-$compressed="";
 if(isset($_POST['Submit'])){ 
-	global $filepath;
-	global $compressed;
-	$filepath = "images/" . $_FILES["file"]["name"];
-	$compressed="images/compressed_" . $_FILES["file"]["name"];
+	$file=str_replace(' ', '-', $_FILES["file"]["name"]);
+	$filepath = "images/" . $file;
+	$compressed="images/compressed_" .$file;
 	if(move_uploaded_file($_FILES["file"]["tmp_name"], $filepath)) {
 		echo "Original Image: <br/>";
 		echo "<img src=".$filepath." height=360> <br/>";
@@ -25,7 +22,6 @@ if(isset($_POST['Submit'])){
 	else {
 		echo "Error !!";
 	}
-	$compressed="images/compressed_" . $_FILES["file"]["name"];
 	$singular=$_POST["fname"];
 	$command = "py backend.py ". $filepath." ".$compressed." ".$singular;
 	$time=exec($command);

@@ -3,6 +3,7 @@ from PIL import Image
 import math
 import sys
 import time
+from scipy.linalg import lu
 
 def imageToMatRGB(ar):
     tempMatR=[[0 for j in range(np.shape(ar)[1])] for i in range(np.shape(ar)[0])]
@@ -135,14 +136,75 @@ def sqrt(m):
     root = math.sqrt(square)
     return root
 
+def gaussJordan(m):
+    ranks=[]
+    #divide
+    for i in range(np.shape(m)[0]):
+        f=0
+        d=1
+        for j in range(np.shape(m)[1]):
+            if f==0 and m[i,j]>0.00001:
+                f=1
+                d=m[i,j]
+                m[i,j]=1
+                ranks.append(j)
+            else:
+                m[i,j]/=d
+    #add
+    for i in range(len(m)):
+        for j in range(len(m[0])):
+            if m[i,j]==1:
+                for k in range(i-1,-1,-1):
+                    arr=m[i]
+                    arr=arr*(-1*m[k,j])
+                    m[k]=np.add(arr,m[k])
+                break
+    #conquer
+    ret=[]
+    for j in range(np.shape(m)[1]):
+        if j in ranks:
+            continue
+        ans=[]
+        for i in range(np.shape(m)[0]):
+            ans.append(m[i,j])
+        ans[j]=1
+        ans=np.array(ans)
+        ret.append(ans)
+    return ret
+ 
 def U(m):
     A = np.copy(m)
     AT = np.transpose(A)
     AAT = np.dot(A,AT)
-    """
-    Mencari nilai eigen dari AAT, lalu di-assign ke nilai_eigen
-    Mencari vektor eigen dari nilai eigen, lalu di-assign ke vektor_eigen
-    """
+    
+    #eigen values
+    mat=[]
+    for i in range(np.shape(AAT)[0]):
+        mat.append([])
+        for j in range(np.shape(AAT)[1]):
+            mat[i].append([])
+            mat[i][j].append(AAT[i,j])
+    for i in range(np.shape(AAT)[0]):
+        mat[i][i].append(-1)
+    poly=invMatDet(detMatrixPol(mat))
+    poly=np.array(poly)
+    roots=np.roots(poly)
+    #eigen vectors
+    vektor_eigen=[]
+    for root in roots:
+        mat=[]
+        for i in range(np.shape(AAT)[0]):
+            mat.append([])
+            for j in range(np.shape(AAT)[1]):
+                mat[i].append(AAT[i,j])
+        for i in range(np.shape(AAT)[0]):
+            mat[i][i]-=root
+        mat=np.array(mat)
+        pl, u = lu(mat, permute_l=True)
+        vecs=gaussJordan(u)
+        for i in range(len(vecs)):
+            vektor_eigen.append(vecs[i])
+     
     normal = np.copy(vektor_eigen)
     for i in range(len(normal)):
         normal[i] = np.divide(vektor_eigen[i],sqrt(vektor_eigen[i]))
@@ -151,15 +213,29 @@ def U(m):
         combine = np.column_stack((combine,normal[j]))
     return combine
 
-def sigma(m):
+def sigma(m,sv_used):
     A = np.copy(m)
     AT = np.transpose(A)
     ATA = np.dot(AT,A)
-    """
-    Mencari nilai eigen yang tidak nol dari ATA, lalu di-assign ke nilai_eigen
-    """
+    
+    #eigen values
+    mat=[]
+    for i in range(np.shape(ATA)[0]):
+        mat.append([])
+        for j in range(np.shape(ATA)[1]):
+            mat[i].append([])
+            mat[i][j].append(ATA[i,j])
+    for i in range(np.shape(ATA)[0]):
+        mat[i][i].append(-1)
+    poly=invMatDet(detMatrixPol(mat))
+    poly=np.array(poly)
+    nilai_eigen=np.roots(poly)
+    
     singular = np.copy(nilai_eigen)
-    for i in range(len(singular)):
+    n=len(singular)
+    if (isinstance(sv_used) and sv_used>0 and sv_used<n):
+        n=sv_used
+    for i in range(n):
         singular[i] = math.sqrt(nilai_eigen[i])
     result = np.zeros(np.shape(A))
     row = np.shape(result)[0]
@@ -176,10 +252,35 @@ def VT(m):
     A = np.copy(m)
     AT = np.transpose(A)
     ATA = np.dot(AT,A)
-    """
-    Mencari nilai eigen dari ATA, lalu di-assign ke nilai_eigen
-    Mencari vektor eigen dari nilai eigen, lalu di-assign ke vektor_eigen
-    """
+    
+    #eigen values
+    mat=[]
+    for i in range(np.shape(ATA)[0]):
+        mat.append([])
+        for j in range(np.shape(ATA)[1]):
+            mat[i].append([])
+            mat[i][j].append(ATA[i,j])
+    for i in range(np.shape(ATA)[0]):
+        mat[i][i].append(-1)
+    poly=invMatDet(detMatrixPol(mat))
+    poly=np.array(poly)
+    roots=np.roots(poly)
+    #eigen vectors
+    vektor_eigen=[]
+    for root in roots:
+        mat=[]
+        for i in range(np.shape(ATA)[0]):
+            mat.append([])
+            for j in range(np.shape(ATA)[1]):
+                mat[i].append(ATA[i,j])
+        for i in range(np.shape(ATA)[0]):
+            mat[i][i]-=root
+        mat=np.array(mat)
+        pl, u = lu(mat, permute_l=True)
+        vecs=gaussJordan(u)
+        for i in range(len(vecs)):
+            vektor_eigen.append(vecs[i])
+     
     normal = np.copy(vektor_eigen)
     for i in range(len(normal)):
         normal[i] = np.divide(vektor_eigen[i],sqrt(vektor_eigen[i]))
@@ -188,6 +289,15 @@ def VT(m):
         combine = np.column_stack((combine,normal[j]))
     combineT = np.transpose(combine)
     return combineT
+    
+def SVD(m,sv_used):
+    matU=U(m)
+    matS=sigma(m,sv_used)
+    matV=VT(m)
+    ret=np.dot(matU,matS)
+    ret=np.dot(ret,matV)
+    return ret
+    
 
 '''
 mat = [[[-5, 1], [-4], [3]], #contoh
@@ -197,16 +307,19 @@ print((invMatDet(detMatrixPol(mat))))
 '''
 
 if __name__ == '__main__':
+    #Args handling
+    filename=sys.argv[1]
+    compressed=sys.argv[2]
+    sv_used=sys.argv[3]
+    
     #Image to matrix
     t_start=time.time()
-    filename=sys.argv[1]
     im=Image.open(filename)
     ar=np.array(im)
     if (len(np.shape(ar))==3): #RGB
         mats=imageToMatRGB(ar)
     else: #BW
         mats=ar
-    sv_used=sys.argv[3]
  
     #matrix calculation here
     #Case 1: RGB, mats: array of 3 matrices, each n*m.
@@ -218,15 +331,14 @@ if __name__ == '__main__':
         for i in range(3):
             mat=mats[i]
             #SVD mat
-            mats[i]=mat
+            mats[i]=SVD(mat,sv_used)
     else:
         #Case 2
         mat=mats
         #SVD mat
-        mats=mat
+        mats=SVD(mat,sv_used)
     
     #Outputs
-    compressed=sys.argv[2]
     if (len(np.shape(ar))==3): #RGB
         matToImageRGB(mats[0],mats[1],mats[2],compressed)
     else:
@@ -234,3 +346,11 @@ if __name__ == '__main__':
         im.save(compressed)    
     t_end=time.time()
     print(t_end-t_start)
+
+
+'''
+mat=[[2.,4.,4.,4.],[0.,2.,1.,2.],[0.,0.,1.,1.],[0.,0.,0.,0.]]
+mat=np.array(mat)
+
+a=(U(mat))
+'''
