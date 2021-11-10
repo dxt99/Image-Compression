@@ -197,6 +197,7 @@ print((invMatDet(detMatrixPol(mat))))
 '''
 
 if __name__ == '__main__':
+    #Image to matrix
     t_start=time.time()
     filename=sys.argv[1]
     im=Image.open(filename)
@@ -205,12 +206,26 @@ if __name__ == '__main__':
         mats=imageToMatRGB(ar)
     else: #BW
         mats=ar
-    
+    sv_used=sys.argv[3]
+ 
     #matrix calculation here
     #Case 1: RGB, mats: array of 3 matrices, each n*m.
     #        Just SVD each array seperately
     #Case 2: BW, mats: a matrix, size n*m, normal SVD
+    #Number of singular value used: sv_used (MAY NOT BE INTEGER)
+    if (len(np.shape(ar))==3):
+        #Case 1
+        for i in range(3):
+            mat=mats[i]
+            #SVD mat
+            mats[i]=mat
+    else:
+        #Case 2
+        mat=mats
+        #SVD mat
+        mats=mat
     
+    #Outputs
     compressed=sys.argv[2]
     if (len(np.shape(ar))==3): #RGB
         matToImageRGB(mats[0],mats[1],mats[2],compressed)
