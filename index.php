@@ -17,7 +17,7 @@ if(isset($_POST['Submit'])){
 	$filepath = "images/" . $file;
 	$compressed="images/compressed_" .$file;
 	if(move_uploaded_file($_FILES["file"]["tmp_name"], $filepath)) {
-		echo "Original Image: <br/>";
+		echo "Original Image: <br/><br/>";
 		echo "<img src=".$filepath." height=360> <br/>";
 	} 
 	else {
