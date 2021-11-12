@@ -3,6 +3,7 @@ from PIL import Image
 import math
 import sys
 import time
+from numpy.lib.polynomial import roots
 from scipy.linalg import lu
 
 def imageToMatRGB(ar):
@@ -129,6 +130,24 @@ def invMatDet(m): #Memutar posisi matriks determinan agar pangkat terbesar di po
         idxTemp -=1
     return matRes
 
+def simultaneous_power_iteration(A, k):
+    n, m = A.shape
+    Q = np.random.rand(n, k)
+    Q, _ = np.linalg.qr(Q)
+    Q_prev = Q
+ 
+    for i in range(1000):
+        Z = A.dot(Q)
+        Q, R = np.linalg.qr(Z)
+
+        # can use other stopping criteria as well 
+        err = ((Q - Q_prev) ** 2).sum()
+        Q_prev = Q
+        if err < 1e-3:
+            break
+
+    return np.diag(R), Q
+
 def sqrt(m):
     square = 0
     for i in range(len(m)):
@@ -175,20 +194,24 @@ def gaussJordan(m):
 def U(m):
     A = np.copy(m)
     AT = np.transpose(A)
+    A = np.array(A, dtype=np.int64)
+    AT = np.array(AT, dtype=np.int64)
     AAT = np.dot(A,AT)
     
     #eigen values
-    mat=[]
-    for i in range(np.shape(AAT)[0]):
-        mat.append([])
-        for j in range(np.shape(AAT)[1]):
-            mat[i].append([])
-            mat[i][j].append(AAT[i,j])
-    for i in range(np.shape(AAT)[0]):
-        mat[i][i].append(-1)
-    poly=invMatDet(detMatrixPol(mat))
-    poly=np.array(poly)
-    roots=np.roots(poly)
+    # mat=[]
+    # for i in range(np.shape(AAT)[0]):
+    #     mat.append([])
+    #     for j in range(np.shape(AAT)[1]):
+    #         mat[i].append([])
+    #         mat[i][j].append(AAT[i,j])
+    # for i in range(np.shape(AAT)[0]):
+    #     mat[i][i].append(-1)
+    # poly=invMatDet(detMatrixPol(mat))
+    # poly=np.array(poly)
+    # roots=np.roots(poly)
+    roots = simultaneous_power_iteration(AAT, len(AAT))[0] #mendapatkan nilai eigen
+    print(roots)
     #eigen vectors
     vektor_eigen=[]
     for root in roots:
@@ -216,20 +239,22 @@ def U(m):
 def sigma(m,sv_used):
     A = np.copy(m)
     AT = np.transpose(A)
+    A = np.array(A, dtype=np.int64)
+    AT = np.array(AT, dtype=np.int64)
     ATA = np.dot(AT,A)
-    
     #eigen values
-    mat=[]
-    for i in range(np.shape(ATA)[0]):
-        mat.append([])
-        for j in range(np.shape(ATA)[1]):
-            mat[i].append([])
-            mat[i][j].append(ATA[i,j])
-    for i in range(np.shape(ATA)[0]):
-        mat[i][i].append(-1)
-    poly=invMatDet(detMatrixPol(mat))
-    poly=np.array(poly)
-    nilai_eigen=np.roots(poly)
+    # mat=[]
+    # for i in range(np.shape(ATA)[0]):
+    #     mat.append([])
+    #     for j in range(np.shape(ATA)[1]):
+    #         mat[i].append([])
+    #         mat[i][j].append(ATA[i,j])
+    # for i in range(np.shape(ATA)[0]):
+    #     mat[i][i].append(-1)
+    # poly=invMatDet(detMatrixPol(mat))
+    # poly=np.array(poly)
+    # nilai_eigen=np.roots(poly)
+    nilai_eigen = simultaneous_power_iteration(ATA, len(ATA))[0] 
     
     singular = np.copy(nilai_eigen)
     n=len(singular)
@@ -251,20 +276,23 @@ def sigma(m,sv_used):
 def VT(m):
     A = np.copy(m)
     AT = np.transpose(A)
+    A = np.array(A, dtype=np.int64)
+    AT = np.array(AT, dtype=np.int64)
     ATA = np.dot(AT,A)
     
     #eigen values
-    mat=[]
-    for i in range(np.shape(ATA)[0]):
-        mat.append([])
-        for j in range(np.shape(ATA)[1]):
-            mat[i].append([])
-            mat[i][j].append(ATA[i,j])
-    for i in range(np.shape(ATA)[0]):
-        mat[i][i].append(-1)
-    poly=invMatDet(detMatrixPol(mat))
-    poly=np.array(poly)
-    roots=np.roots(poly)
+    # mat=[]
+    # for i in range(np.shape(ATA)[0]):
+    #     mat.append([])
+    #     for j in range(np.shape(ATA)[1]):
+    #         mat[i].append([])
+    #         mat[i][j].append(ATA[i,j])
+    # for i in range(np.shape(ATA)[0]):
+    #     mat[i][i].append(-1)
+    # poly=invMatDet(detMatrixPol(mat))
+    # poly=np.array(poly)
+    # roots=np.roots(poly)
+    roots = simultaneous_power_iteration(ATA, len(ATA))[0]
     #eigen vectors
     vektor_eigen=[]
     for root in roots:
