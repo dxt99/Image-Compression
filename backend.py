@@ -233,7 +233,7 @@ def sigma(m,sv_used):
     
     singular = np.copy(nilai_eigen)
     n=len(singular)
-    if (isinstance(sv_used) and sv_used>0 and sv_used<n):
+    if (isinstance(sv_used, int) and sv_used>0 and sv_used<n):
         n=sv_used
     for i in range(n):
         singular[i] = math.sqrt(nilai_eigen[i])
