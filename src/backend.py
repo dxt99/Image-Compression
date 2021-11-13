@@ -3,7 +3,6 @@ from PIL import Image
 import math
 import sys
 import time
-from numpy.lib.polynomial import roots
 from scipy.linalg import lu
 
 def imageToMatRGB(ar):
@@ -30,6 +29,7 @@ def matToImageRGB(matR,matG,matB,compressed):
         for j in range(np.shape(matR)[1]):
             tempMatRGB[i][j]=[matR[i,j],matG[i,j],matB[i,j]]
     matRGB=np.array(tempMatRGB)
+    matRGB=matRGB.astype(np.uint8)
     im = Image.fromarray(matRGB)
     im.save(compressed) #filename probably needs to change
     
@@ -130,23 +130,6 @@ def invMatDet(m): #Memutar posisi matriks determinan agar pangkat terbesar di po
         idxTemp -=1
     return matRes
 
-def simultaneous_power_iteration(A, k):
-    n, m = A.shape
-    Q = np.random.rand(n, k)
-    Q, _ = np.linalg.qr(Q)
-    Q_prev = Q
- 
-    for i in range(1000):
-        Z = A.dot(Q)
-        Q, R = np.linalg.qr(Z)
-
-        # can use other stopping criteria as well 
-        err = ((Q - Q_prev) ** 2).sum()
-        Q_prev = Q
-        if err < 1e-3:
-            break
-
-    return np.diag(R), Q
 
 def sqrt(m):
     square = 0
@@ -190,87 +173,71 @@ def gaussJordan(m):
         ans=np.array(ans)
         ret.append(ans)
     return ret
+
+def simultaneous_power_iteration(A, k):
+    n, m = A.shape
+    Q = np.random.rand(n, k)
+    Q, _ = np.linalg.qr(Q)
+    Q_prev = Q
+ 
+    for i in range(1000):
+        Z = A.dot(Q)
+        Q, R = np.linalg.qr(Z)
+
+        # can use other stopping criteria as well 
+        err = ((Q - Q_prev) ** 2).sum()
+
+        Q_prev = Q
+        if err < 1e-3:
+            break
+
+    return np.diag(R), Q
  
 def U(m):
     A = np.copy(m)
     AT = np.transpose(A)
     A = np.array(A, dtype=np.int64)
     AT = np.array(AT, dtype=np.int64)
-    AAT = np.dot(A,AT)
-    
-    #eigen values
-    # mat=[]
-    # for i in range(np.shape(AAT)[0]):
-    #     mat.append([])
-    #     for j in range(np.shape(AAT)[1]):
-    #         mat[i].append([])
-    #         mat[i][j].append(AAT[i,j])
-    # for i in range(np.shape(AAT)[0]):
-    #     mat[i][i].append(-1)
-    # poly=invMatDet(detMatrixPol(mat))
-    # poly=np.array(poly)
-    # roots=np.roots(poly)
-    roots = simultaneous_power_iteration(AAT, len(AAT))[0] #mendapatkan nilai eigen
-    print(roots)
-    #eigen vectors
-    vektor_eigen=[]
-    for root in roots:
-        mat=[]
-        for i in range(np.shape(AAT)[0]):
-            mat.append([])
-            for j in range(np.shape(AAT)[1]):
-                mat[i].append(AAT[i,j])
-        for i in range(np.shape(AAT)[0]):
-            mat[i][i]-=root
-        mat=np.array(mat)
-        pl, u = lu(mat, permute_l=True)
-        vecs=gaussJordan(u)
-        for i in range(len(vecs)):
-            vektor_eigen.append(vecs[i])
-     
-    normal = np.copy(vektor_eigen)
-    for i in range(len(normal)):
-        normal[i] = np.divide(vektor_eigen[i],sqrt(vektor_eigen[i]))
-    combine = normal[0]
-    for j in range(1,len(normal)):
-        combine = np.column_stack((combine,normal[j]))
-    return combine
+    AAT = np.dot(A, AT)
+    eigen = simultaneous_power_iteration(np.array(AAT), len(AAT))
+    vectorEigen = eigen[1]
+    norm = []
+    for j in range(len(vectorEigen[0])):
+        temp = 0
+        for i in range(len(vectorEigen)):
+            temp += vectorEigen[i][j]**2
+        temp = temp**(0.5)
+        norm.append(temp)
+    for j in range(len(vectorEigen[0])):
+        for i in range(len(vectorEigen)):
+            vectorEigen[i][j] = vectorEigen[i][j]/norm[j]
+    return(vectorEigen)
 
-def sigma(m,sv_used):
+def sigma(m):
     A = np.copy(m)
     AT = np.transpose(A)
     A = np.array(A, dtype=np.int64)
     AT = np.array(AT, dtype=np.int64)
-    ATA = np.dot(AT,A)
-    #eigen values
-    # mat=[]
-    # for i in range(np.shape(ATA)[0]):
-    #     mat.append([])
-    #     for j in range(np.shape(ATA)[1]):
-    #         mat[i].append([])
-    #         mat[i][j].append(ATA[i,j])
-    # for i in range(np.shape(ATA)[0]):
-    #     mat[i][i].append(-1)
-    # poly=invMatDet(detMatrixPol(mat))
-    # poly=np.array(poly)
-    # nilai_eigen=np.roots(poly)
-    nilai_eigen = simultaneous_power_iteration(ATA, len(ATA))[0] 
-    
+    ATA= np.dot(AT, A)
+    nilai_eigen= simultaneous_power_iteration(np.array(ATA), len(ATA))[0]
+    result = np.zeros(np.shape(A))
     singular = np.copy(nilai_eigen)
     n=len(singular)
-    if (isinstance(sv_used, int) and sv_used>0 and sv_used<n):
-        n=sv_used
     for i in range(n):
-        singular[i] = math.sqrt(nilai_eigen[i])
-    result = np.zeros(np.shape(A))
-    row = np.shape(result)[0]
-    col = np.shape(result)[1]
-    i = 0
-    for j in range(row):
-        for k in range(col):
-            if (j == k):
-                result[j][k] = nilai_eigen[i]
-                i += 1
+        if (singular[i] < (10**(-8))) :
+            singular[i] = 0
+        else :
+            singular[i] = math.sqrt(nilai_eigen[i])
+    col = len(result[0])
+    row = len(result)
+    for i in range(row):
+        for j in range(col):
+            if row >= col :
+                if i == j :
+                    result[i][j] = singular[j]
+            else :
+                if i == j :
+                    result[i][j] = singular[i]
     return result
 
 def VT(m):
@@ -278,67 +245,47 @@ def VT(m):
     AT = np.transpose(A)
     A = np.array(A, dtype=np.int64)
     AT = np.array(AT, dtype=np.int64)
-    ATA = np.dot(AT,A)
-    
-    #eigen values
-    # mat=[]
-    # for i in range(np.shape(ATA)[0]):
-    #     mat.append([])
-    #     for j in range(np.shape(ATA)[1]):
-    #         mat[i].append([])
-    #         mat[i][j].append(ATA[i,j])
-    # for i in range(np.shape(ATA)[0]):
-    #     mat[i][i].append(-1)
-    # poly=invMatDet(detMatrixPol(mat))
-    # poly=np.array(poly)
-    # roots=np.roots(poly)
-    roots = simultaneous_power_iteration(ATA, len(ATA))[0]
-    #eigen vectors
-    vektor_eigen=[]
-    for root in roots:
-        mat=[]
-        for i in range(np.shape(ATA)[0]):
-            mat.append([])
-            for j in range(np.shape(ATA)[1]):
-                mat[i].append(ATA[i,j])
-        for i in range(np.shape(ATA)[0]):
-            mat[i][i]-=root
-        mat=np.array(mat)
-        pl, u = lu(mat, permute_l=True)
-        vecs=gaussJordan(u)
-        for i in range(len(vecs)):
-            vektor_eigen.append(vecs[i])
-     
-    normal = np.copy(vektor_eigen)
-    for i in range(len(normal)):
-        normal[i] = np.divide(vektor_eigen[i],sqrt(vektor_eigen[i]))
-    combine = normal[0]
-    for j in range(1,len(normal)):
-        combine = np.column_stack((combine,normal[j]))
-    combineT = np.transpose(combine)
-    return combineT
-    
-def SVD(m,sv_used):
+    ATA = np.dot(AT, A)
+    searchEigen = simultaneous_power_iteration(np.array(ATA), len(ATA))
+    vectorEigen = searchEigen[1]
+    norm = []
+    for j in range(len(vectorEigen[0])):
+        temp = 0
+        for i in range(len(vectorEigen)):
+            temp += vectorEigen[i][j]**2
+        temp = temp**(0.5)
+        norm.append(temp)
+    for j in range(len(vectorEigen[0])):
+        for i in range(len(vectorEigen)):
+            vectorEigen[i][j] = vectorEigen[i][j]/norm[j]
+    return np.transpose(vectorEigen)
+
+def SVD(m,percentCompress):
     matU=U(m)
-    matS=sigma(m,sv_used)
+    matS=sigma(m)
     matV=VT(m)
-    ret=np.dot(matU,matS)
-    ret=np.dot(ret,matV)
+    sv = 0
+    if (len(matS) > len(matS[0])):
+        sv = len(matS[0])
+    else:
+        sv = len(matS)
+    sv_used = int(np.round((int(percentCompress)/100)*sv)) #Masukan precentCompress dari 1-100 (semakin kecil, maka semakin banyak sv yang dibuang)
+    matUCompressed = np.delete(matU,[i for i in range(sv_used,np.shape(matU)[1])], 1)
+    matVCompressed = np.delete(matV,[i for i in range(sv_used,np.shape(matV)[0])], 0)
+    matSCompressed = np.delete(matS,[i for i in range(sv_used,np.shape(matS)[1])], 1)
+    matSCompressed = np.delete(matSCompressed,[i for i in range(sv_used,np.shape(matSCompressed)[0])], 0)
+    ret = np.dot(np.dot(matUCompressed, matSCompressed), matVCompressed)
+    for i in range(len(ret)):
+        for j in range(len(ret[0])):
+            ret[i][j] = np.round(ret[i][j])
     return ret
     
-
-'''
-mat = [[[-5, 1], [-4], [3]], #contoh
-        [[-4], [-5, 1], [3]], 
-        [[3], [3], [-2, 1]]]
-print((invMatDet(detMatrixPol(mat))))
-'''
 
 if __name__ == '__main__':
     #Args handling
     filename=sys.argv[1]
     compressed=sys.argv[2]
-    sv_used=sys.argv[3]
+    percentCompress=sys.argv[3]
     
     #Image to matrix
     t_start=time.time()
@@ -358,13 +305,14 @@ if __name__ == '__main__':
         #Case 1
         for i in range(3):
             mat=mats[i]
+
             #SVD mat
-            mats[i]=SVD(mat,sv_used)
+            mats[i]=SVD(mat,percentCompress)
     else:
         #Case 2
         mat=mats
         #SVD mat
-        mats=SVD(mat,sv_used)
+        mats=SVD(mat,percentCompress)
     
     #Outputs
     if (len(np.shape(ar))==3): #RGB
@@ -374,11 +322,3 @@ if __name__ == '__main__':
         im.save(compressed)    
     t_end=time.time()
     print(t_end-t_start)
-
-
-'''
-mat=[[2.,4.,4.,4.],[0.,2.,1.,2.],[0.,0.,1.,1.],[0.,0.,0.,0.]]
-mat=np.array(mat)
-
-a=(U(mat))
-'''
