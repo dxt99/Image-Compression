@@ -23,7 +23,7 @@ def imageToMatRGB(ar):
     matB=np.array(tempMatB)
     return [matR,matG,matB]
 
-def matToImageRGB(matR,matG,matB,compressed):
+def matToImageRGB(matR,matG,matB,compressed,testcompressed):
     tempMatRGB=[[[0,0,0] for j in range(np.shape(matR)[1])] for i in range(np.shape(matR)[0])]
     for i in range(np.shape(matR)[0]):
         for j in range(np.shape(matR)[1]):
@@ -31,7 +31,8 @@ def matToImageRGB(matR,matG,matB,compressed):
     matRGB=np.array(tempMatRGB)
     matRGB=matRGB.astype(np.uint8)
     im = Image.fromarray(matRGB)
-    im.save(compressed) #filename probably needs to change
+    im.save(compressed)
+    im.save(testcompressed)
     
 def sumPol(m1,m2): #Penjumlahan Polinom
     lenM1 = len(m1)
@@ -286,10 +287,13 @@ if __name__ == '__main__':
     filename=sys.argv[1]
     compressed=sys.argv[2]
     percentCompress=sys.argv[3]
+    testpath=sys.argv[4]
+    testcompressed=sys.argv[5]
     
     #Image to matrix
     t_start=time.time()
     im=Image.open(filename)
+    im.save(testpath)
     ar=np.array(im)
     if (len(np.shape(ar))==3): #RGB
         mats=imageToMatRGB(ar)
@@ -316,9 +320,10 @@ if __name__ == '__main__':
     
     #Outputs
     if (len(np.shape(ar))==3): #RGB
-        matToImageRGB(mats[0],mats[1],mats[2],compressed)
+        matToImageRGB(mats[0],mats[1],mats[2],compressed,testcompressed)
     else:
         im = Image.fromarray(mats)
-        im.save(compressed)    
+        im.save(compressed)
+        im.save(testcompressed)
     t_end=time.time()
     print(t_end-t_start)
