@@ -181,7 +181,7 @@ def simultaneous_power_iteration(A, k):
     Q, _ = np.linalg.qr(Q)
     Q_prev = Q
  
-    for i in range(1000):
+    for i in range(5000):
         Z = A.dot(Q)
         Q, R = np.linalg.qr(Z)
 
@@ -193,93 +193,56 @@ def simultaneous_power_iteration(A, k):
             break
 
     return np.diag(R), Q
+
+
  
-def U(m):
+def U(m, sv_used):
     A = np.copy(m)
     AT = np.transpose(A)
     A = np.array(A, dtype=np.int64)
     AT = np.array(AT, dtype=np.int64)
     AAT = np.dot(A, AT)
-    eigen = simultaneous_power_iteration(np.array(AAT), len(AAT))
+    eigen = simultaneous_power_iteration(np.array(AAT), sv_used)
     vectorEigen = eigen[1]
-    norm = []
-    for j in range(len(vectorEigen[0])):
-        temp = 0
-        for i in range(len(vectorEigen)):
-            temp += vectorEigen[i][j]**2
-        temp = temp**(0.5)
-        norm.append(temp)
-    for j in range(len(vectorEigen[0])):
-        for i in range(len(vectorEigen)):
-            vectorEigen[i][j] = vectorEigen[i][j]/norm[j]
     return(vectorEigen)
 
-def sigma(m):
+def sigma(m, sv_used):
     A = np.copy(m)
     AT = np.transpose(A)
     A = np.array(A, dtype=np.int64)
     AT = np.array(AT, dtype=np.int64)
     ATA= np.dot(AT, A)
-    nilai_eigen= simultaneous_power_iteration(np.array(ATA), len(ATA))[0]
+    nilai_eigen= simultaneous_power_iteration(np.array(ATA), sv_used)[0]
     result = np.zeros(np.shape(A))
     singular = np.copy(nilai_eigen)
+
     n=len(singular)
     for i in range(n):
-        if (singular[i] < (10**(-8))) :
+        if nilai_eigen[i] < 10**(-8) :
             singular[i] = 0
         else :
             singular[i] = math.sqrt(nilai_eigen[i])
-    col = len(result[0])
-    row = len(result)
-    for i in range(row):
-        for j in range(col):
-            if row >= col :
-                if i == j :
-                    result[i][j] = singular[j]
-            else :
-                if i == j :
-                    result[i][j] = singular[i]
+    result = np.diag(singular)
     return result
 
-def VT(m):
+def VT(m, sv_used):
     A = np.copy(m)
     AT = np.transpose(A)
     A = np.array(A, dtype=np.int64)
     AT = np.array(AT, dtype=np.int64)
     ATA = np.dot(AT, A)
-    searchEigen = simultaneous_power_iteration(np.array(ATA), len(ATA))
+    searchEigen = simultaneous_power_iteration(np.array(ATA), sv_used)
     vectorEigen = searchEigen[1]
-    norm = []
-    for j in range(len(vectorEigen[0])):
-        temp = 0
-        for i in range(len(vectorEigen)):
-            temp += vectorEigen[i][j]**2
-        temp = temp**(0.5)
-        norm.append(temp)
-    for j in range(len(vectorEigen[0])):
-        for i in range(len(vectorEigen)):
-            vectorEigen[i][j] = vectorEigen[i][j]/norm[j]
     return np.transpose(vectorEigen)
 
 def SVD(m,percentCompress):
-    matU=U(m)
-    matS=sigma(m)
-    matV=VT(m)
-    sv = 0
-    if (len(matS) > len(matS[0])):
-        sv = len(matS[0])
-    else:
-        sv = len(matS)
-    sv_used = int(np.round((int(percentCompress)/100)*sv)) #Masukan precentCompress dari 1-100 (semakin kecil, maka semakin banyak sv yang dibuang)
-    matUCompressed = np.delete(matU,[i for i in range(sv_used,np.shape(matU)[1])], 1)
-    matVCompressed = np.delete(matV,[i for i in range(sv_used,np.shape(matV)[0])], 0)
-    matSCompressed = np.delete(matS,[i for i in range(sv_used,np.shape(matS)[1])], 1)
-    matSCompressed = np.delete(matSCompressed,[i for i in range(sv_used,np.shape(matSCompressed)[0])], 0)
-    ret = np.dot(np.dot(matUCompressed, matSCompressed), matVCompressed)
-    for i in range(len(ret)):
-        for j in range(len(ret[0])):
-            ret[i][j] = np.round(ret[i][j])
-    return ret
+    sv_used = np.round((int(percentCompress)/100)*(min(len(m), len(m[0]))))
+    sv_used = int(sv_used)
+    matU = U(m, sv_used)
+    matS = sigma(m, sv_used)
+    matV = VT(m, sv_used)
+    result = np.dot(np.dot(matU, matS), matV)
+    return result
     
 
 if __name__ == '__main__':
