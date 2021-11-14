@@ -271,10 +271,11 @@ def SVD(m,percentCompress):
     else:
         sv = len(matS)
     sv_used = int(np.round((int(percentCompress)/100)*sv)) #Masukan precentCompress dari 1-100 (semakin kecil, maka semakin banyak sv yang dibuang)
-    matUCompressed = np.delete(matU,[i for i in range(sv_used,np.shape(matU)[1])], 1)
-    matVCompressed = np.delete(matV,[i for i in range(sv_used,np.shape(matV)[0])], 0)
-    matSCompressed = np.delete(matS,[i for i in range(sv_used,np.shape(matS)[1])], 1)
-    matSCompressed = np.delete(matSCompressed,[i for i in range(sv_used,np.shape(matSCompressed)[0])], 0)
+    matUCompressed = matU
+    matVCompressed = matV
+    matSCompressed = np.array(matS)
+    for i in range(sv_used,sv):
+        matSCompressed[i,i]=0
     ret = np.dot(np.dot(matUCompressed, matSCompressed), matVCompressed)
     for i in range(len(ret)):
         for j in range(len(ret[0])):

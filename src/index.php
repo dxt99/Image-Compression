@@ -7,7 +7,7 @@
 	<h1>Image Compression</h1><hr>
 	<form action="index.php" enctype="multipart/form-data" method="post">
 		Select image to compress: <input type="file" name="file"><br><br>
-		Singular value used: <input type="text" name="fname"><br><br>
+		Enter Compression Percent (1-100): <input type="text" name="fname"><br><br>
 		<input type="submit" value="Submit" name="Submit"><br>
 	</form>
 
@@ -17,7 +17,7 @@ if(isset($_POST['Submit'])){
 	$filepath = "images/" . $file;
 	$testpath = "../test/". $file;
 	$compressed="images/compressed_" .$file;
-	$testcompressed="../test/".$file;
+	$testcompressed="../test/compressed_".$file;
 	if(move_uploaded_file($_FILES["file"]["tmp_name"], $filepath)) {
 		echo "Original Image: <br/><br/>";
 		echo "<img src=\"".$filepath."\" height=360> <br/>";
